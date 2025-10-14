@@ -9,10 +9,10 @@ export default function StatusIndicator({ status }: StatusIndicatorProps) {
   const statusConfig = {
     ready: {
       label: 'AI Ready',
-      color: 'text-emerald-500',
-      bgColor: 'bg-emerald-500/10',
-      borderColor: 'border-emerald-500/20',
-      dotColor: 'bg-emerald-500'
+      color: 'text-emerald-400',
+      bgColor: 'bg-emerald-500/20',
+      borderColor: 'border-emerald-500/30',
+      dotColor: 'bg-emerald-400'
     },
     processing: {
       label: 'Processing',
@@ -33,7 +33,7 @@ export default function StatusIndicator({ status }: StatusIndicatorProps) {
   const config = statusConfig[status];
 
   return (
-    <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
+    <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full border ${config.bgColor} ${config.borderColor}`}>
       <div className="relative">
         <div className={`w-2 h-2 rounded-full ${config.dotColor}`} />
         {status === 'ready' && (

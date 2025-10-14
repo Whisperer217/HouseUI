@@ -35,8 +35,8 @@ export default function ProjectGallery({ projects, onProjectClick }: ProjectGall
                 onClick={() => setFilter(f.value)}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                   filter === f.value
-                    ? 'bg-orange-500 text-white shadow-lg'
-                    : 'bg-gray-800/60 text-gray-400 hover:bg-gray-700 hover:text-gray-300 border border-gray-700'
+                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
                 }`}
               >
                 {f.label}

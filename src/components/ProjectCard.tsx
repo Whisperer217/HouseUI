@@ -24,7 +24,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   return (
     <button
       onClick={() => onClick(project)}
-      className="group relative bg-gray-800/80 rounded-xl overflow-hidden hover:scale-[1.02] transition-all duration-200 shadow-xl hover:shadow-2xl border border-gray-700/50 hover:border-gray-600"
+      className="group relative bg-gray-800 rounded-xl overflow-hidden hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-gray-700 hover:border-gray-600"
     >
       <div className={`aspect-video bg-gradient-to-br ${typeColors[project.type]} flex items-center justify-center relative overflow-hidden`}>
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
@@ -40,11 +40,11 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         </div>
       </div>
 
-      <div className="p-5">
-        <h3 className="text-white font-bold text-lg mb-2 text-left">
+      <div className="p-4">
+        <h3 className="text-white font-semibold text-lg mb-2 text-left group-hover:text-amber-400 transition-colors">
           {project.title}
         </h3>
-        <p className="text-gray-400 text-sm mb-4 text-left line-clamp-2">
+        <p className="text-gray-400 text-sm mb-3 text-left line-clamp-2">
           {project.description}
         </p>
 

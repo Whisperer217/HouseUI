@@ -110,23 +110,23 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1419]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
       <Header
         profiles={mockProfiles}
         currentProfile={currentProfile}
         onProfileChange={setCurrentProfile}
-        aiStatus={aiStatus}
       />
 
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 space-y-8 lg:space-y-0">
+        <div className="flex flex-col lg:flex-row items-center justify-between mb-8 space-y-6 lg:space-y-0">
           <div>
-            <h2 className="text-4xl sm:text-5xl font-bold text-white mb-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
               Welcome back, {currentProfile.name}!
             </h2>
-            <p className="text-gray-400 text-xl">What would you like to create today?</p>
+            <p className="text-gray-400 text-lg">What would you like to create today?</p>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex flex-col items-center space-y-4">
+            <StatusIndicator status={aiStatus} />
             <VoiceButton />
           </div>
         </div>

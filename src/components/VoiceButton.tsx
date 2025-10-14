@@ -14,10 +14,10 @@ export default function VoiceButton() {
       className="relative group"
       aria-label={isListening ? 'Stop listening' : 'Start voice command'}
     >
-      <div className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
+      <div className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
         isListening
-          ? 'bg-orange-500 shadow-xl shadow-orange-500/50'
-          : 'bg-orange-500 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105'
+          ? 'bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/50'
+          : 'bg-gradient-to-br from-amber-500 to-orange-600 hover:shadow-lg hover:shadow-amber-500/50'
       }`}>
         {isListening ? (
           <MicOff className="w-7 h-7 text-white" />
