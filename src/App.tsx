@@ -3,11 +3,15 @@ import Header from './components/Header';
 import StatusIndicator from './components/StatusIndicator';
 import VoiceButton from './components/VoiceButton';
 import QuickCreateBar from './components/QuickCreateBar';
-import ProjectGallery from './components/ProjectGallery';
 import ChatPanel from './components/ChatPanel';
+import SearchBar from './components/SearchBar';
+import SwipeableGallery from './components/SwipeableGallery';
+import ActivityFeed from './components/ActivityFeed';
+import TemplatesModal from './components/TemplatesModal';
 import { FamilyProfile, Project, AIStatus } from './types';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
+import { Sparkles } from 'lucide-react';
 
 const familyProfiles: FamilyProfile[] = [
   { id: '1', name: 'Jacob', avatar: '👨', color: '#3b82f6' },
@@ -21,6 +25,8 @@ function App() {
   const [aiStatus, setAiStatus] = useState<AIStatus>('offline');
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showTemplates, setShowTemplates] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -73,6 +79,31 @@ function App() {
     console.log('Opening project:', project.title);
   };
 
+  const handleSelectTemplate = async (template: any) => {
+    try {
+      setAiStatus('processing');
+
+      const newProject = await projectService.createProject({
+        title: template.title,
+        description: template.description,
+        type: template.type as 'game' | 'app' | 'story' | 'art',
+        created_by: currentProfile.id,
+      });
+
+      const mappedProject = mapDBProjectToProject(newProject);
+      setProjects([mappedProject, ...projects]);
+      setAiStatus('ready');
+    } catch (error) {
+      console.error('Error creating project from template:', error);
+      setAiStatus('offline');
+    }
+  };
+
+  const filteredProjects = projects.filter(project =>
+    project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
       <Header
@@ -82,9 +113,9 @@ function App() {
       />
 
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-start justify-between mb-8 gap-8">
-          <div className="flex-1 w-full">
-            <div className="flex flex-col lg:flex-row items-center justify-between mb-8 space-y-6 lg:space-y-0">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3 space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                   Welcome back, {currentProfile.name}!
@@ -97,7 +128,22 @@ function App() {
               </div>
             </div>
 
-            <div className="mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search projects..."
+              />
+              <button
+                onClick={() => setShowTemplates(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+              >
+                <Sparkles className="w-5 h-5" />
+                Templates
+              </button>
+            </div>
+
+            <div>
               <h3 className="text-xl font-semibold text-white mb-4">Quick Create</h3>
               <QuickCreateBar onCreateClick={handleCreateClick} />
             </div>
@@ -109,24 +155,37 @@ function App() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
                   Loading projects...
                 </div>
-              ) : projects.length === 0 ? (
+              ) : filteredProjects.length === 0 ? (
                 <div className="text-center text-gray-400 py-12">
-                  <p className="text-lg">No projects yet. Click Quick Create to get started!</p>
+                  <p className="text-lg">
+                    {searchQuery
+                      ? 'No projects match your search'
+                      : 'No projects yet. Click Quick Create or browse Templates!'}
+                  </p>
                 </div>
               ) : (
-                <ProjectGallery
-                  projects={projects}
+                <SwipeableGallery
+                  projects={filteredProjects}
                   onProjectClick={handleProjectClick}
                 />
               )}
             </div>
           </div>
 
-          <div className="w-full lg:w-96 lg:sticky lg:top-24">
-            <ChatPanel currentProfile={currentProfile} />
+          <div className="lg:col-span-1 space-y-6">
+            <div className="lg:sticky lg:top-24 space-y-6">
+              <ActivityFeed />
+              <ChatPanel currentProfile={currentProfile} />
+            </div>
           </div>
         </div>
       </main>
+
+      <TemplatesModal
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onSelectTemplate={handleSelectTemplate}
+      />
     </div>
   );
 }
