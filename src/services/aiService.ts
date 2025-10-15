@@ -28,8 +28,8 @@ interface ComputeNode {
 }
 
 const DEFAULT_CONFIG: AIConfig = {
-  endpoint: 'http://localhost:11434',
-  model: 'llama3',
+  endpoint: 'http://localhost:3000',
+  model: 'llama3.2',
   temperature: 0.7,
   maxTokens: 2000,
   endpointType: 'ollama',
@@ -39,7 +39,7 @@ const PRESET_NODES: ComputeNode[] = [
   {
     id: 'local-ollama',
     name: 'Local Ollama',
-    endpoint: 'http://localhost:11434',
+    endpoint: 'http://localhost:3000',
     type: 'ollama',
     isOnline: false,
     models: [],
