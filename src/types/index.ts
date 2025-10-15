@@ -35,3 +35,11 @@ export interface DBProject {
     avatar_url: string | null;
   };
 }
+
+export interface ChatMessage {
+  id: string;
+  user_id: string | null;
+  message: string;
+  is_ai: boolean;
+  created_at: string;
+}

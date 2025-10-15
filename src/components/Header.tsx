@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { User, ChevronDown } from 'lucide-react';
 import { FamilyProfile } from '../types';
+import SystemStats from './SystemStats';
 
 interface HeaderProps {
   profiles: FamilyProfile[];
@@ -14,7 +15,7 @@ export default function Header({ profiles, currentProfile, onProfileChange }: He
   return (
     <header className="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
               <span className="text-xl font-bold text-white">AI</span>
@@ -23,6 +24,10 @@ export default function Header({ profiles, currentProfile, onProfileChange }: He
               <h1 className="text-xl font-bold text-white">Family AI System</h1>
               <p className="text-xs text-gray-400">Create, Explore, Imagine</p>
             </div>
+          </div>
+
+          <div className="hidden lg:block">
+            <SystemStats />
           </div>
 
           <div className="relative">

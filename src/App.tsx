@@ -4,6 +4,7 @@ import StatusIndicator from './components/StatusIndicator';
 import VoiceButton from './components/VoiceButton';
 import QuickCreateBar from './components/QuickCreateBar';
 import ProjectGallery from './components/ProjectGallery';
+import ChatPanel from './components/ChatPanel';
 import { FamilyProfile, Project, AIStatus } from './types';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
@@ -81,41 +82,49 @@ function App() {
       />
 
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-center justify-between mb-8 space-y-6 lg:space-y-0">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-              Welcome back, {currentProfile.name}!
-            </h2>
-            <p className="text-gray-400 text-lg">What would you like to create today?</p>
-          </div>
-          <div className="flex flex-col items-center space-y-4">
-            <StatusIndicator status={aiStatus} />
-            <VoiceButton />
-          </div>
-        </div>
-
-        <div className="mb-12">
-          <h3 className="text-xl font-semibold text-white mb-4">Quick Create</h3>
-          <QuickCreateBar onCreateClick={handleCreateClick} />
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold text-white mb-6">Your Projects</h3>
-          {loading ? (
-            <div className="text-center text-gray-400 py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              Loading projects...
+        <div className="flex flex-col lg:flex-row items-start justify-between mb-8 gap-8">
+          <div className="flex-1 w-full">
+            <div className="flex flex-col lg:flex-row items-center justify-between mb-8 space-y-6 lg:space-y-0">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                  Welcome back, {currentProfile.name}!
+                </h2>
+                <p className="text-gray-400 text-lg">What would you like to create today?</p>
+              </div>
+              <div className="flex flex-col items-center space-y-4">
+                <StatusIndicator status={aiStatus} />
+                <VoiceButton />
+              </div>
             </div>
-          ) : projects.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
-              <p className="text-lg">No projects yet. Click Quick Create to get started!</p>
+
+            <div className="mb-12">
+              <h3 className="text-xl font-semibold text-white mb-4">Quick Create</h3>
+              <QuickCreateBar onCreateClick={handleCreateClick} />
             </div>
-          ) : (
-            <ProjectGallery
-              projects={projects}
-              onProjectClick={handleProjectClick}
-            />
-          )}
+
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-6">Your Projects</h3>
+              {loading ? (
+                <div className="text-center text-gray-400 py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  Loading projects...
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="text-center text-gray-400 py-12">
+                  <p className="text-lg">No projects yet. Click Quick Create to get started!</p>
+                </div>
+              ) : (
+                <ProjectGallery
+                  projects={projects}
+                  onProjectClick={handleProjectClick}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="w-full lg:w-96 lg:sticky lg:top-24">
+            <ChatPanel currentProfile={currentProfile} />
+          </div>
         </div>
       </main>
     </div>
