@@ -21,6 +21,8 @@ import { FamilyProfile } from '../types';
 import MessageReactions from './chat/MessageReactions';
 import MessageContent from './chat/MessageContent';
 import VoiceRecorder from './chat/VoiceRecorder';
+import AITypingIndicator from './chat/AITypingIndicator';
+import { aiService, AIMessage } from '../services/aiService';
 
 interface Thread {
   id: string;
@@ -86,6 +88,8 @@ export default function FullscreenChat({
   const [searchQuery, setSearchQuery] = useState('');
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
+  const [isAITyping, setIsAITyping] = useState(false);
+  const [aiStreamingMessage, setAiStreamingMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,6 +184,7 @@ export default function FullscreenChat({
     try {
       const mentions = extractMentions(messageInput);
       const messageType = detectMessageType(messageInput);
+      const hasAIMention = mentions.includes('ai') || messageInput.toLowerCase().includes('@ai');
 
       const { data: newMessage, error } = await supabase
         .from('thread_messages')
@@ -219,12 +224,80 @@ export default function FullscreenChat({
         }
       }
 
+      const userMessage = messageInput;
       setMessageInput('');
       setUploadedFiles([]);
       loadMessages(selectedThread.id);
+
+      if (hasAIMention || selectedThread.type === 'ai') {
+        handleAIResponse(userMessage);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     }
+  };
+
+  const handleAIResponse = async (userMessage: string) => {
+    if (!selectedThread) return;
+
+    setIsAITyping(true);
+    setAiStreamingMessage('');
+
+    const conversationHistory: AIMessage[] = messages
+      .slice(-10)
+      .map((msg) => ({
+        role: msg.user_id === 'ai' ? 'assistant' : 'user',
+        content: msg.content,
+      }));
+
+    conversationHistory.push({
+      role: 'user',
+      content: userMessage,
+    });
+
+    const context = aiService.buildContextFromThread(
+      selectedThread.name,
+      selectedThread.description || undefined
+    );
+
+    let fullResponse = '';
+
+    await aiService.generateResponse(
+      conversationHistory,
+      {
+        onToken: (token) => {
+          fullResponse += token;
+          setAiStreamingMessage(fullResponse);
+        },
+        onComplete: async (response) => {
+          setIsAITyping(false);
+          setAiStreamingMessage('');
+
+          const messageType = detectMessageType(response);
+
+          await supabase.from('thread_messages').insert({
+            thread_id: selectedThread.id,
+            user_id: 'ai',
+            user_name: 'AI Assistant',
+            user_avatar: '🤖',
+            content: response,
+            mentions: [],
+            has_files: false,
+            message_type: messageType.type,
+            code_language: messageType.language,
+          });
+
+          loadMessages(selectedThread.id);
+        },
+        onError: (error) => {
+          console.error('AI error:', error);
+          setIsAITyping(false);
+          setAiStreamingMessage('');
+          alert('AI connection failed. Check your AI settings and make sure Ollama is running.');
+        },
+      },
+      context
+    );
   };
 
   const handleVoiceMessage = async (audioBlob: Blob, duration: number) => {
@@ -636,6 +709,29 @@ export default function FullscreenChat({
                     </div>
                   );
                 })}
+
+                {isAITyping && (
+                  <div className="flex gap-3">
+                    <div className="text-2xl">🤖</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-white">AI Assistant</span>
+                        <span className="text-xs text-gray-500">typing...</span>
+                      </div>
+                      <div className="inline-block px-4 py-2 rounded-lg bg-gray-800 text-white">
+                        {aiStreamingMessage || (
+                          <div className="flex gap-1">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        )}
+                        {aiStreamingMessage && <MessageContent content={aiStreamingMessage} messageType="text" />}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 

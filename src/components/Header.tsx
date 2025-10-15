@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, ChevronDown } from 'lucide-react';
+import { User, ChevronDown, Settings } from 'lucide-react';
 import { FamilyProfile } from '../types';
 import SystemStats from './SystemStats';
 
@@ -7,9 +7,10 @@ interface HeaderProps {
   profiles: FamilyProfile[];
   currentProfile: FamilyProfile;
   onProfileChange: (profile: FamilyProfile) => void;
+  onAISettings?: () => void;
 }
 
-export default function Header({ profiles, currentProfile, onProfileChange }: HeaderProps) {
+export default function Header({ profiles, currentProfile, onProfileChange, onAISettings }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
@@ -30,7 +31,18 @@ export default function Header({ profiles, currentProfile, onProfileChange }: He
             <SystemStats />
           </div>
 
-          <div className="relative">
+          <div className="flex items-center gap-3">
+            {onAISettings && (
+              <button
+                onClick={onAISettings}
+                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors group"
+                title="AI Settings"
+              >
+                <Settings className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+              </button>
+            )}
+
+            <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center space-x-3 px-4 py-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
@@ -69,6 +81,7 @@ export default function Header({ profiles, currentProfile, onProfileChange }: He
                 ))}
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>

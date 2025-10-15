@@ -11,6 +11,7 @@ import TemplatesModal from './components/TemplatesModal';
 import ArsenalPanel from './components/ArsenalPanel';
 import FullscreenChat from './components/FullscreenChat';
 import FloatingChatButton from './components/FloatingChatButton';
+import AISettingsModal from './components/AISettingsModal';
 import { FamilyProfile, Project, AIStatus } from './types';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
@@ -32,6 +33,7 @@ function App() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showArsenal, setShowArsenal] = useState(false);
   const [showFullscreenChat, setShowFullscreenChat] = useState(false);
+  const [showAISettings, setShowAISettings] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -115,6 +117,7 @@ function App() {
         profiles={familyProfiles}
         currentProfile={currentProfile}
         onProfileChange={setCurrentProfile}
+        onAISettings={() => setShowAISettings(true)}
       />
 
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -218,6 +221,11 @@ function App() {
           currentUserId={currentProfile.id}
         />
       )}
+
+      <AISettingsModal
+        isOpen={showAISettings}
+        onClose={() => setShowAISettings(false)}
+      />
     </div>
   );
 }
