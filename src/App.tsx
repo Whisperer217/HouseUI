@@ -18,17 +18,14 @@ import { Theme, themes } from './types/theme';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
 import { themeService } from './services/themeService';
+import { supabase } from './lib/supabase';
 import { Sparkles, Wrench, Palette } from 'lucide-react';
 
-const familyProfiles: FamilyProfile[] = [
-  { id: '1', name: 'Jacob', avatar: '👨', color: '#3b82f6' },
-  { id: '2', name: 'Abby', avatar: '👧', color: '#ec4899' },
-  { id: '3', name: 'Ben', avatar: '👦', color: '#10b981' },
-  { id: '4', name: 'Rox', avatar: '🐕', color: '#f59e0b' },
-];
+const profileColors = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b'];
 
 function App() {
-  const [currentProfile, setCurrentProfile] = useState<FamilyProfile>(familyProfiles[0]);
+  const [familyProfiles, setFamilyProfiles] = useState<FamilyProfile[]>([]);
+  const [currentProfile, setCurrentProfile] = useState<FamilyProfile | null>(null);
   const [aiStatus, setAiStatus] = useState<AIStatus>('offline');
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,15 +38,42 @@ function App() {
   const [currentTheme, setCurrentTheme] = useState<Theme>(themes.dark);
 
   useEffect(() => {
+    loadProfiles();
     loadProjects();
-    loadTheme();
   }, []);
 
   useEffect(() => {
-    loadTheme();
+    if (currentProfile) {
+      loadTheme();
+    }
   }, [currentProfile]);
 
+  const loadProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const profiles: FamilyProfile[] = data.map((profile, index) => ({
+          id: profile.id,
+          name: profile.name,
+          avatar: profile.avatar_url,
+          color: profileColors[index % profileColors.length],
+        }));
+        setFamilyProfiles(profiles);
+        setCurrentProfile(profiles[0]);
+      }
+    } catch (error) {
+      console.error('Error loading profiles:', error);
+    }
+  };
+
   const loadTheme = async () => {
+    if (!currentProfile) return;
     try {
       const theme = await themeService.loadUserTheme(currentProfile.id);
       setCurrentTheme(theme);
@@ -74,6 +98,7 @@ function App() {
   };
 
   const handleCreateClick = async (type: string) => {
+    if (!currentProfile) return;
     try {
       setAiStatus('processing');
 
@@ -106,6 +131,7 @@ function App() {
   };
 
   const handleSelectTemplate = async (template: any) => {
+    if (!currentProfile) return;
     try {
       setAiStatus('processing');
 
@@ -129,6 +155,17 @@ function App() {
     project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     project.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (!currentProfile) {
+    return (
+      <div className={`min-h-screen ${currentTheme.background} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading profiles...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${currentTheme.background}`}>
