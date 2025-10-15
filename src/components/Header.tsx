@@ -50,10 +50,14 @@ export default function Header({ profiles, currentProfile, onProfileChange, onAI
               className="flex items-center space-x-3 px-4 py-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
             >
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden"
                 style={{ backgroundColor: currentProfile.color }}
               >
-                {currentProfile.avatar}
+                {currentProfile.avatar.startsWith('http') ? (
+                  <img src={currentProfile.avatar} alt={currentProfile.name} className="w-full h-full object-cover" />
+                ) : (
+                  currentProfile.avatar
+                )}
               </div>
               <span className="text-white font-medium hidden sm:inline">{currentProfile.name}</span>
               <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -73,10 +77,14 @@ export default function Header({ profiles, currentProfile, onProfileChange, onAI
                     }`}
                   >
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden"
                       style={{ backgroundColor: profile.color }}
                     >
-                      {profile.avatar}
+                      {profile.avatar.startsWith('http') ? (
+                        <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                      ) : (
+                        profile.avatar
+                      )}
                     </div>
                     <span className="text-white font-medium">{profile.name}</span>
                   </button>
