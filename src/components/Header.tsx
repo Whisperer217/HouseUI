@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { User, ChevronDown, Settings } from 'lucide-react';
 import { FamilyProfile } from '../types';
+import { Theme, themes } from '../types/theme';
 import SystemStats from './SystemStats';
 
 interface HeaderProps {
@@ -8,13 +9,14 @@ interface HeaderProps {
   currentProfile: FamilyProfile;
   onProfileChange: (profile: FamilyProfile) => void;
   onAISettings?: () => void;
+  theme?: Theme;
 }
 
-export default function Header({ profiles, currentProfile, onProfileChange, onAISettings }: HeaderProps) {
+export default function Header({ profiles, currentProfile, onProfileChange, onAISettings, theme = themes.dark }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 z-50">
+    <header className={`fixed top-0 left-0 right-0 ${theme.headerBg} backdrop-blur-sm border-b ${theme.cardBorder} z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">

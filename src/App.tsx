@@ -12,10 +12,13 @@ import ArsenalPanel from './components/ArsenalPanel';
 import FullscreenChat from './components/FullscreenChat';
 import FloatingChatButton from './components/FloatingChatButton';
 import AISettingsModal from './components/AISettingsModal';
+import ThemeSelector from './components/ThemeSelector';
 import { FamilyProfile, Project, AIStatus } from './types';
+import { Theme, themes } from './types/theme';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
-import { Sparkles, Wrench } from 'lucide-react';
+import { themeService } from './services/themeService';
+import { Sparkles, Wrench, Palette } from 'lucide-react';
 
 const familyProfiles: FamilyProfile[] = [
   { id: '1', name: 'Jacob', avatar: '👨', color: '#3b82f6' },
@@ -34,10 +37,26 @@ function App() {
   const [showArsenal, setShowArsenal] = useState(false);
   const [showFullscreenChat, setShowFullscreenChat] = useState(false);
   const [showAISettings, setShowAISettings] = useState(false);
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(themes.dark);
 
   useEffect(() => {
     loadProjects();
+    loadTheme();
   }, []);
+
+  useEffect(() => {
+    loadTheme();
+  }, [currentProfile]);
+
+  const loadTheme = async () => {
+    try {
+      const theme = await themeService.loadUserTheme(currentProfile.id);
+      setCurrentTheme(theme);
+    } catch (error) {
+      console.error('Error loading theme:', error);
+    }
+  };
 
   const loadProjects = async () => {
     try {
@@ -112,12 +131,13 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
+    <div className={`min-h-screen ${currentTheme.background}`}>
       <Header
         profiles={familyProfiles}
         currentProfile={currentProfile}
         onProfileChange={setCurrentProfile}
         onAISettings={() => setShowAISettings(true)}
+        theme={currentTheme}
       />
 
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -155,6 +175,13 @@ function App() {
               >
                 <Wrench className="w-5 h-5" />
                 Arsenal
+              </button>
+              <button
+                onClick={() => setShowThemeSelector(true)}
+                className={`flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r ${currentTheme.accent} hover:${currentTheme.accentHover} text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl`}
+              >
+                <Palette className="w-5 h-5" />
+                Theme
               </button>
             </div>
 
@@ -225,6 +252,13 @@ function App() {
       <AISettingsModal
         isOpen={showAISettings}
         onClose={() => setShowAISettings(false)}
+      />
+
+      <ThemeSelector
+        isOpen={showThemeSelector}
+        onClose={() => setShowThemeSelector(false)}
+        userId={currentProfile.id}
+        onThemeChange={(theme) => setCurrentTheme(theme)}
       />
     </div>
   );
