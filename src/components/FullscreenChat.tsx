@@ -575,7 +575,15 @@ export default function FullscreenChat({
                       {pinnedMessages.map((message) => (
                         <div key={message.id} className="bg-gray-800/50 rounded-lg p-3">
                           <div className="flex items-start gap-2 mb-2">
-                            <span className="text-xl">{message.user_avatar}</span>
+                            {message.user_avatar.startsWith('http') ? (
+                              <img
+                                src={message.user_avatar}
+                                alt={message.user_name}
+                                className="w-8 h-8 rounded-full flex-shrink-0"
+                              />
+                            ) : (
+                              <span className="text-xl">{message.user_avatar}</span>
+                            )}
                             <div className="flex-1">
                               <span className="font-semibold text-white text-sm">
                                 {message.user_name}
@@ -612,7 +620,17 @@ export default function FullscreenChat({
                         isMentioned ? 'bg-yellow-500/10 -mx-6 px-6 py-2 rounded-lg' : ''
                       }`}
                     >
-                      <div className="text-2xl">{message.user_avatar}</div>
+                      <div className="flex-shrink-0">
+                        {message.user_avatar.startsWith('http') ? (
+                          <img
+                            src={message.user_avatar}
+                            alt={message.user_name}
+                            className="w-10 h-10 rounded-full"
+                          />
+                        ) : (
+                          <div className="text-2xl">{message.user_avatar}</div>
+                        )}
+                      </div>
                       <div className={`flex-1 ${isCurrentUser ? 'text-right' : ''}`}>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-white">
@@ -712,7 +730,7 @@ export default function FullscreenChat({
 
                 {isAITyping && (
                   <div className="flex gap-3">
-                    <div className="text-2xl">🤖</div>
+                    <div className="flex-shrink-0 text-2xl">🤖</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-white">AI Assistant</span>
@@ -766,12 +784,20 @@ export default function FullscreenChat({
                           onClick={() => insertMention(profile)}
                           className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-600 rounded-lg transition-colors"
                         >
-                          <span className="text-xl">{profile.avatar}</span>
+                          {profile.avatar.startsWith('http') ? (
+                            <img
+                              src={profile.avatar}
+                              alt={profile.name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <span className="text-xl">{profile.avatar}</span>
+                          )}
                           <span className="text-white">{profile.name}</span>
                         </button>
                       ))}
                       <button
-                        onClick={() => insertMention({ id: 'ai', name: 'AI', avatar: '🤖', color: '#f59e0b' })}
+                        onClick={() => insertMention({ id: 'ai', name: 'AI', avatar: '🤖', color: '#f59e0b' } as FamilyProfile)}
                         className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-600 rounded-lg transition-colors"
                       >
                         <Bot className="w-5 h-5 text-blue-400" />
