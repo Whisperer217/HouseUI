@@ -8,10 +8,11 @@ import SearchBar from './components/SearchBar';
 import SwipeableGallery from './components/SwipeableGallery';
 import ActivityFeed from './components/ActivityFeed';
 import TemplatesModal from './components/TemplatesModal';
+import ArsenalPanel from './components/ArsenalPanel';
 import { FamilyProfile, Project, AIStatus } from './types';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Wrench } from 'lucide-react';
 
 const familyProfiles: FamilyProfile[] = [
   { id: '1', name: 'Jacob', avatar: '👨', color: '#3b82f6' },
@@ -27,6 +28,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showArsenal, setShowArsenal] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -141,6 +143,13 @@ function App() {
                 <Sparkles className="w-5 h-5" />
                 Templates
               </button>
+              <button
+                onClick={() => setShowArsenal(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+              >
+                <Wrench className="w-5 h-5" />
+                Arsenal
+              </button>
             </div>
 
             <div>
@@ -185,6 +194,12 @@ function App() {
         isOpen={showTemplates}
         onClose={() => setShowTemplates(false)}
         onSelectTemplate={handleSelectTemplate}
+      />
+
+      <ArsenalPanel
+        isOpen={showArsenal}
+        onClose={() => setShowArsenal(false)}
+        userId={currentProfile.id}
       />
     </div>
   );
