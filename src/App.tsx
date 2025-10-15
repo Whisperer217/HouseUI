@@ -1,108 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import StatusIndicator from './components/StatusIndicator';
 import VoiceButton from './components/VoiceButton';
 import QuickCreateBar from './components/QuickCreateBar';
 import ProjectGallery from './components/ProjectGallery';
 import { FamilyProfile, Project, AIStatus } from './types';
+import { projectService } from './services/projectService';
+import { mapDBProjectToProject } from './utils/projectMapper';
 
-const mockProfiles: FamilyProfile[] = [
-  { id: '1', name: 'Dad', avatar: '👨', color: '#3b82f6' },
-  { id: '2', name: 'Mom', avatar: '👩', color: '#ec4899' },
-  { id: '3', name: 'Emma', avatar: '👧', color: '#8b5cf6' },
-  { id: '4', name: 'Lucas', avatar: '👦', color: '#10b981' },
-];
-
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    title: 'Space Adventure Game',
-    type: 'game',
-    thumbnail: 'https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Explore the galaxy in this exciting space adventure with alien encounters',
-    createdBy: 'Lucas',
-    createdAt: '2025-10-10',
-    lastModified: '2 days ago',
-  },
-  {
-    id: '2',
-    title: 'Recipe Book App',
-    type: 'app',
-    thumbnail: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Store and organize all our family recipes in one place',
-    createdBy: 'Mom',
-    createdAt: '2025-10-08',
-    lastModified: '5 days ago',
-  },
-  {
-    id: '3',
-    title: 'The Magic Forest',
-    type: 'document',
-    thumbnail: 'https://images.pexels.com/photos/957024/forest-trees-perspective-bright-957024.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'A collaborative story about a magical forest and its creatures',
-    createdBy: 'Emma',
-    createdAt: '2025-10-12',
-    lastModified: '1 hour ago',
-  },
-  {
-    id: '4',
-    title: 'Dragon Portrait',
-    type: 'art',
-    thumbnail: 'https://images.pexels.com/photos/1616403/pexels-photo-1616403.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Digital painting of a majestic dragon in the mountains',
-    createdBy: 'Emma',
-    createdAt: '2025-10-11',
-    lastModified: 'Yesterday',
-  },
-  {
-    id: '5',
-    title: 'Math Quiz Master',
-    type: 'game',
-    thumbnail: 'https://images.pexels.com/photos/3729557/pexels-photo-3729557.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Fun math challenges to practice addition and multiplication',
-    createdBy: 'Lucas',
-    createdAt: '2025-10-09',
-    lastModified: '3 days ago',
-  },
-  {
-    id: '6',
-    title: 'Family Chore Tracker',
-    type: 'app',
-    thumbnail: 'https://images.pexels.com/photos/4239146/pexels-photo-4239146.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Track weekly chores and earn rewards for completion',
-    createdBy: 'Dad',
-    createdAt: '2025-10-07',
-    lastModified: '1 week ago',
-  },
-  {
-    id: '7',
-    title: 'Ocean Sunset',
-    type: 'art',
-    thumbnail: 'https://images.pexels.com/photos/1118874/pexels-photo-1118874.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Watercolor painting of a peaceful sunset over the ocean',
-    createdBy: 'Mom',
-    createdAt: '2025-10-13',
-    lastModified: '3 hours ago',
-  },
-  {
-    id: '8',
-    title: 'Summer Vacation Journal',
-    type: 'document',
-    thumbnail: 'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: 'Our family memories from the beach trip this summer',
-    createdBy: 'Dad',
-    createdAt: '2025-10-06',
-    lastModified: '1 week ago',
-  },
+const familyProfiles: FamilyProfile[] = [
+  { id: '1', name: 'Jacob', avatar: '👨', color: '#3b82f6' },
+  { id: '2', name: 'Abby', avatar: '👧', color: '#ec4899' },
+  { id: '3', name: 'Ben', avatar: '👦', color: '#10b981' },
+  { id: '4', name: 'Rox', avatar: '🐕', color: '#f59e0b' },
 ];
 
 function App() {
-  const [currentProfile, setCurrentProfile] = useState<FamilyProfile>(mockProfiles[0]);
-  const [aiStatus] = useState<AIStatus>('ready');
-  const [projects] = useState<Project[]>(mockProjects);
+  const [currentProfile, setCurrentProfile] = useState<FamilyProfile>(familyProfiles[0]);
+  const [aiStatus, setAiStatus] = useState<AIStatus>('offline');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleCreateClick = (type: string) => {
-    console.log(`Creating new ${type}...`);
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const dbProjects = await projectService.getAllProjects();
+      const mappedProjects = dbProjects.map(mapDBProjectToProject);
+      setProjects(mappedProjects);
+      setAiStatus('ready');
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      setAiStatus('offline');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateClick = async (type: string) => {
+    try {
+      setAiStatus('processing');
+
+      const projectTitles = {
+        game: 'Untitled Game',
+        app: 'Untitled App',
+        story: 'Untitled Story',
+        art: 'Untitled Art',
+      };
+
+      const newProject = await projectService.createProject({
+        title: projectTitles[type as keyof typeof projectTitles] || 'New Project',
+        description: `A new ${type} project`,
+        type: type as 'game' | 'app' | 'story' | 'art',
+        created_by: currentProfile.id,
+      });
+
+      const mappedProject = mapDBProjectToProject(newProject);
+      setProjects([mappedProject, ...projects]);
+      setAiStatus('ready');
+    } catch (error) {
+      console.error('Error creating project:', error);
+      alert('Failed to create project. Please make sure the database is set up.');
+      setAiStatus('offline');
+    }
   };
 
   const handleProjectClick = (project: Project) => {
@@ -112,7 +75,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
       <Header
-        profiles={mockProfiles}
+        profiles={familyProfiles}
         currentProfile={currentProfile}
         onProfileChange={setCurrentProfile}
       />
@@ -138,10 +101,21 @@ function App() {
 
         <div>
           <h3 className="text-xl font-semibold text-white mb-6">Your Projects</h3>
-          <ProjectGallery
-            projects={projects}
-            onProjectClick={handleProjectClick}
-          />
+          {loading ? (
+            <div className="text-center text-gray-400 py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              Loading projects...
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center text-gray-400 py-12">
+              <p className="text-lg">No projects yet. Click Quick Create to get started!</p>
+            </div>
+          ) : (
+            <ProjectGallery
+              projects={projects}
+              onProjectClick={handleProjectClick}
+            />
+          )}
         </div>
       </main>
     </div>
