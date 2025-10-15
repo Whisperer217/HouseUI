@@ -9,6 +9,8 @@ import SwipeableGallery from './components/SwipeableGallery';
 import ActivityFeed from './components/ActivityFeed';
 import TemplatesModal from './components/TemplatesModal';
 import ArsenalPanel from './components/ArsenalPanel';
+import FullscreenChat from './components/FullscreenChat';
+import FloatingChatButton from './components/FloatingChatButton';
 import { FamilyProfile, Project, AIStatus } from './types';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
@@ -29,6 +31,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showTemplates, setShowTemplates] = useState(false);
   const [showArsenal, setShowArsenal] = useState(false);
+  const [showFullscreenChat, setShowFullscreenChat] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -201,6 +204,20 @@ function App() {
         onClose={() => setShowArsenal(false)}
         userId={currentProfile.id}
       />
+
+      <FullscreenChat
+        isOpen={showFullscreenChat}
+        onClose={() => setShowFullscreenChat(false)}
+        currentProfile={currentProfile}
+        familyProfiles={familyProfiles}
+      />
+
+      {!showFullscreenChat && (
+        <FloatingChatButton
+          onClick={() => setShowFullscreenChat(true)}
+          currentUserId={currentProfile.id}
+        />
+      )}
     </div>
   );
 }
