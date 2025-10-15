@@ -51,7 +51,7 @@ export default function Header({ profiles, currentProfile, onProfileChange, onAI
             >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden"
-                style={{ backgroundColor: currentProfile.color }}
+                style={{ backgroundColor: currentProfile.avatar.startsWith('http') ? 'transparent' : currentProfile.color }}
               >
                 {currentProfile.avatar.startsWith('http') ? (
                   <img src={currentProfile.avatar} alt={currentProfile.name} className="w-full h-full object-cover" />
@@ -78,7 +78,7 @@ export default function Header({ profiles, currentProfile, onProfileChange, onAI
                   >
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold overflow-hidden"
-                      style={{ backgroundColor: profile.color }}
+                      style={{ backgroundColor: profile.avatar.startsWith('http') ? 'transparent' : profile.color }}
                     >
                       {profile.avatar.startsWith('http') ? (
                         <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
