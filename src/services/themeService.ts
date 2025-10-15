@@ -19,7 +19,7 @@ class ThemeService {
   async loadUserTheme(userId: string): Promise<Theme> {
     try {
       const { data, error } = await supabase
-        .from('family_profiles')
+        .from('profiles')
         .select('preferences')
         .eq('id', userId)
         .maybeSingle();
@@ -39,7 +39,7 @@ class ThemeService {
   async saveUserTheme(userId: string, themeId: string): Promise<void> {
     try {
       const { data: existingData } = await supabase
-        .from('family_profiles')
+        .from('profiles')
         .select('preferences')
         .eq('id', userId)
         .maybeSingle();
@@ -48,7 +48,7 @@ class ThemeService {
       preferences.theme = themeId;
 
       const { error } = await supabase
-        .from('family_profiles')
+        .from('profiles')
         .update({ preferences })
         .eq('id', userId);
 
