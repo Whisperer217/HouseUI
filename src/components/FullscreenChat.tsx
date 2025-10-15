@@ -4,19 +4,23 @@ import {
   Send,
   Paperclip,
   Minimize2,
-  Hash,
-  AtSign,
   Bot,
   Pin,
   Search,
   Plus,
   X,
-  Reply,
   Image as ImageIcon,
   File,
+  Mic,
+  Code,
+  MoreVertical,
+  PinOff,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { FamilyProfile } from '../types';
+import MessageReactions from './chat/MessageReactions';
+import MessageContent from './chat/MessageContent';
+import VoiceRecorder from './chat/VoiceRecorder';
 
 interface Thread {
   id: string;
@@ -42,6 +46,11 @@ interface Message {
   reply_to: string | null;
   created_at: string;
   files?: MessageFile[];
+  reactions: Record<string, string[]>;
+  is_pinned: boolean;
+  message_type: string;
+  code_language?: string | null;
+  voice_duration?: number | null;
 }
 
 interface MessageFile {
@@ -51,6 +60,7 @@ interface MessageFile {
   file_size: number;
   file_url: string;
   thumbnail_url: string | null;
+  is_preview: boolean;
 }
 
 interface FullscreenChatProps {
@@ -74,6 +84,8 @@ export default function FullscreenChat({
   const [mentionFilter, setMentionFilter] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [showMessageMenu, setShowMessageMenu] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,6 +133,7 @@ export default function FullscreenChat({
         .from('thread_messages')
         .select('*, message_files(*)')
         .eq('thread_id', threadId)
+        .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -129,6 +142,7 @@ export default function FullscreenChat({
           data.map((msg: any) => ({
             ...msg,
             files: msg.message_files || [],
+            reactions: msg.reactions || {},
           }))
         );
       }
@@ -151,12 +165,21 @@ export default function FullscreenChat({
     }
   };
 
+  const detectMessageType = (content: string): { type: string; language?: string } => {
+    const codeBlockMatch = content.match(/```(\w+)/);
+    if (codeBlockMatch) {
+      return { type: 'code', language: codeBlockMatch[1] };
+    }
+    return { type: 'text' };
+  };
+
   const handleSendMessage = async () => {
     if (!messageInput.trim() && uploadedFiles.length === 0) return;
     if (!selectedThread) return;
 
     try {
       const mentions = extractMentions(messageInput);
+      const messageType = detectMessageType(messageInput);
 
       const { data: newMessage, error } = await supabase
         .from('thread_messages')
@@ -168,6 +191,8 @@ export default function FullscreenChat({
           content: messageInput,
           mentions: mentions,
           has_files: uploadedFiles.length > 0,
+          message_type: messageType.type,
+          code_language: messageType.language,
         })
         .select()
         .single();
@@ -178,6 +203,7 @@ export default function FullscreenChat({
         for (const file of uploadedFiles) {
           const reader = new FileReader();
           reader.onload = async (e) => {
+            const isImage = file.type.startsWith('image/');
             await supabase.from('message_files').insert({
               message_id: newMessage.id,
               file_name: file.name,
@@ -185,6 +211,8 @@ export default function FullscreenChat({
               file_size: file.size,
               file_url: e.target?.result as string,
               uploaded_by: currentProfile.id,
+              is_preview: isImage,
+              preview_generated: isImage,
             });
           };
           reader.readAsDataURL(file);
@@ -196,6 +224,97 @@ export default function FullscreenChat({
       loadMessages(selectedThread.id);
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const handleVoiceMessage = async (audioBlob: Blob, duration: number) => {
+    if (!selectedThread) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const { data: newMessage, error } = await supabase
+          .from('thread_messages')
+          .insert({
+            thread_id: selectedThread.id,
+            user_id: currentProfile.id,
+            user_name: currentProfile.name,
+            user_avatar: currentProfile.avatar,
+            content: 'Voice message',
+            message_type: 'voice',
+            voice_duration: duration,
+            has_files: true,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        if (newMessage) {
+          await supabase.from('message_files').insert({
+            message_id: newMessage.id,
+            file_name: `voice_${Date.now()}.webm`,
+            file_type: 'audio/webm',
+            file_size: audioBlob.size,
+            file_url: e.target?.result as string,
+            uploaded_by: currentProfile.id,
+          });
+
+          loadMessages(selectedThread.id);
+        }
+      };
+      reader.readAsDataURL(audioBlob);
+      setShowVoiceRecorder(false);
+    } catch (error) {
+      console.error('Error sending voice message:', error);
+    }
+  };
+
+  const togglePinMessage = async (messageId: string, isPinned: boolean) => {
+    try {
+      await supabase
+        .from('thread_messages')
+        .update({
+          is_pinned: !isPinned,
+          pinned_at: !isPinned ? new Date().toISOString() : null,
+          pinned_by: !isPinned ? currentProfile.id : null,
+        })
+        .eq('id', messageId);
+
+      if (selectedThread) {
+        loadMessages(selectedThread.id);
+      }
+      setShowMessageMenu(null);
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+    }
+  };
+
+  const handleReaction = async (messageId: string, emoji: string, isAdd: boolean) => {
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+
+    const reactions = { ...message.reactions };
+    if (isAdd) {
+      reactions[emoji] = [...(reactions[emoji] || []), currentProfile.id];
+    } else {
+      reactions[emoji] = (reactions[emoji] || []).filter((id) => id !== currentProfile.id);
+      if (reactions[emoji].length === 0) {
+        delete reactions[emoji];
+      }
+    }
+
+    try {
+      await supabase
+        .from('thread_messages')
+        .update({ reactions })
+        .eq('id', messageId);
+
+      if (selectedThread) {
+        loadMessages(selectedThread.id);
+      }
+    } catch (error) {
+      console.error('Error updating reaction:', error);
     }
   };
 
@@ -261,6 +380,9 @@ export default function FullscreenChat({
   const filteredProfiles = familyProfiles.filter((profile) =>
     profile.name.toLowerCase().includes(mentionFilter)
   );
+
+  const pinnedMessages = messages.filter((m) => m.is_pinned);
+  const regularMessages = messages.filter((m) => !m.is_pinned);
 
   if (!isOpen) return null;
 
@@ -368,7 +490,45 @@ export default function FullscreenChat({
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-                {messages.map((message) => {
+                {pinnedMessages.length > 0 && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Pin className="w-4 h-4 text-yellow-500" />
+                      <span className="text-sm font-semibold text-yellow-500">
+                        Pinned Messages
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {pinnedMessages.map((message) => (
+                        <div key={message.id} className="bg-gray-800/50 rounded-lg p-3">
+                          <div className="flex items-start gap-2 mb-2">
+                            <span className="text-xl">{message.user_avatar}</span>
+                            <div className="flex-1">
+                              <span className="font-semibold text-white text-sm">
+                                {message.user_name}
+                              </span>
+                              <MessageContent
+                                content={message.content}
+                                messageType={message.message_type}
+                                codeLanguage={message.code_language}
+                                voiceDuration={message.voice_duration}
+                                voiceUrl={message.files?.[0]?.file_url}
+                              />
+                            </div>
+                            <button
+                              onClick={() => togglePinMessage(message.id, true)}
+                              className="p-1 hover:bg-gray-700 rounded transition-colors"
+                            >
+                              <PinOff className="w-4 h-4 text-yellow-500" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {regularMessages.map((message) => {
                   const isCurrentUser = message.user_id === currentProfile.id;
                   const isMentioned = message.mentions.includes(currentProfile.id);
 
@@ -396,27 +556,82 @@ export default function FullscreenChat({
                               : 'bg-gray-800 text-white'
                           }`}
                         >
-                          {message.content}
+                          <MessageContent
+                            content={message.content}
+                            messageType={message.message_type}
+                            codeLanguage={message.code_language}
+                            voiceDuration={message.voice_duration}
+                            voiceUrl={message.files?.[0]?.file_url}
+                          />
                         </div>
-                        {message.files && message.files.length > 0 && (
+                        {message.files && message.files.length > 0 && message.message_type !== 'voice' && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {message.files.map((file) => (
-                              <div
-                                key={file.id}
-                                className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg"
-                              >
-                                {file.file_type.startsWith('image/') ? (
-                                  <ImageIcon className="w-4 h-4 text-blue-400" />
+                              <div key={file.id}>
+                                {file.file_type.startsWith('image/') && file.is_preview ? (
+                                  <img
+                                    src={file.file_url}
+                                    alt={file.file_name}
+                                    className="max-w-xs rounded-lg"
+                                  />
                                 ) : (
-                                  <File className="w-4 h-4 text-gray-400" />
+                                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg">
+                                    <File className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm text-white">
+                                      {file.file_name}
+                                    </span>
+                                  </div>
                                 )}
-                                <span className="text-sm text-white">
-                                  {file.file_name}
-                                </span>
                               </div>
                             ))}
                           </div>
                         )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <MessageReactions
+                            reactions={message.reactions}
+                            currentUserId={currentProfile.id}
+                            onAddReaction={(emoji) => handleReaction(message.id, emoji, true)}
+                            onRemoveReaction={(emoji) => handleReaction(message.id, emoji, false)}
+                          />
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setShowMessageMenu(
+                                  showMessageMenu === message.id ? null : message.id
+                                )
+                              }
+                              className="p-1 hover:bg-gray-700 rounded transition-colors"
+                            >
+                              <MoreVertical className="w-4 h-4 text-gray-400" />
+                            </button>
+                            {showMessageMenu === message.id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-10"
+                                  onClick={() => setShowMessageMenu(null)}
+                                />
+                                <div className="absolute right-0 mt-1 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-1 z-20 min-w-[150px]">
+                                  <button
+                                    onClick={() => togglePinMessage(message.id, message.is_pinned)}
+                                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-700 text-white text-sm"
+                                  >
+                                    {message.is_pinned ? (
+                                      <>
+                                        <PinOff className="w-4 h-4" />
+                                        Unpin
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Pin className="w-4 h-4" />
+                                        Pin
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -470,19 +685,33 @@ export default function FullscreenChat({
                   </div>
                 )}
 
+                <div className="flex items-center gap-2 mb-2 text-xs text-gray-400">
+                  <Code className="w-3 h-3" />
+                  <span>Tip: Use ```language for code blocks</span>
+                </div>
+
                 <div className="flex items-end gap-2">
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     multiple
+                    accept="image/*,application/pdf,.doc,.docx,.txt"
                     className="hidden"
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    title="Attach file"
                   >
                     <Paperclip className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={() => setShowVoiceRecorder(true)}
+                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    title="Record voice message"
+                  >
+                    <Mic className="w-5 h-5 text-gray-400" />
                   </button>
                   <textarea
                     value={messageInput}
@@ -493,7 +722,7 @@ export default function FullscreenChat({
                         handleSendMessage();
                       }
                     }}
-                    placeholder="Type a message... (@mention someone or @AI)"
+                    placeholder="Type a message... (@mention, ```code blocks)"
                     className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={1}
                   />
@@ -516,6 +745,13 @@ export default function FullscreenChat({
           )}
         </div>
       </div>
+
+      {showVoiceRecorder && (
+        <VoiceRecorder
+          onSend={handleVoiceMessage}
+          onCancel={() => setShowVoiceRecorder(false)}
+        />
+      )}
     </div>
   );
 }
