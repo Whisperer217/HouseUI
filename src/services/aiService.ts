@@ -29,7 +29,7 @@ interface ComputeNode {
 
 const DEFAULT_CONFIG: AIConfig = {
   endpoint: 'http://localhost:11434',
-  model: 'llama3.2',
+  model: 'qwen3:8b',
   temperature: 0.7,
   maxTokens: 2000,
   endpointType: 'ollama',
