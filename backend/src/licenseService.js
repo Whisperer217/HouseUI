@@ -93,7 +93,8 @@ class LicenseService {
 
   /**
    * Generate a license key
-   * Format: GRDAI-XXXXX-XXXXX-XXXXX-XXXXX
+   * Format: CRNIF-XXXXX-XXXXX-XXXXX-XXXXX
+   * CRN Interface - Command Domains
    */
   generateLicenseKey() {
     const segments = [];
@@ -101,7 +102,7 @@ class LicenseService {
       const segment = crypto.randomBytes(3).toString('hex').toUpperCase().slice(0, 5);
       segments.push(segment);
     }
-    return `GRDAI-${segments.join('-')}`;
+    return `CRNIF-${segments.join('-')}`;
   }
 
   /**

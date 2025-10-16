@@ -1,7 +1,7 @@
 {
   "licenses": [
     {
-      "key": "GRDAI-B995A-343C6-1B910-78784",
+      "key": "CRNIF-B995A-343C6-1B910-78784",
       "type": "trial",
       "email": "test@example.com",
       "orderId": null,
@@ -21,7 +21,7 @@
       "creatorEconomy": false
     },
     {
-      "key": "GRDAI-3AEA3-93B0A-56D87-69300",
+      "key": "CRNIF-3AEA3-93B0A-56D87-69300",
       "type": "standard",
       "email": "user@example.com",
       "orderId": "ORDER-12345",
@@ -43,7 +43,7 @@
       "creatorEconomy": false
     },
     {
-      "key": "GRDAI-2D58C-3F27A-2777B-8AE39",
+      "key": "CRNIF-2D58C-3F27A-2777B-8AE39",
       "type": "founder",
       "email": "founder@example.com",
       "orderId": null,

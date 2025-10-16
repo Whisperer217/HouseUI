@@ -1,4 +1,4 @@
-# Guardian AI - Windows Installer
+# CRN Interface - Windows Installer
 # One-click installation script for Windows
 
 param(
@@ -6,7 +6,7 @@ param(
 )
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "   Guardian AI - Windows Installer" -ForegroundColor Cyan
+Write-Host "   CRN Interface - Windows Installer" -ForegroundColor Cyan
 Write-Host "   Your Family's AI Assistant" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
@@ -117,14 +117,14 @@ if (-not (Test-Path $InstallPath)) {
 
 Write-Host ""
 
-# Step 5: Install Guardian AI
-Write-Host "[5/6] Installing Guardian AI..." -ForegroundColor Cyan
+# Step 5: Install CRN Interface
+Write-Host "[5/6] Installing CRN Interface..." -ForegroundColor Cyan
 
-# Download Guardian AI package (in production, this would be from a release URL)
+# Download CRN Interface package (in production, this would be from a release URL)
 $guardianUrl = "https://github.com/Whisperer217/HouseUI/archive/refs/heads/main.zip"
-$guardianZip = "$env:TEMP\guardian-ai.zip"
+$guardianZip = "$env:TEMP\crn-interface.zip"
 
-Write-Host "  Downloading Guardian AI..."
+Write-Host "  Downloading CRN Interface..."
 Invoke-WebRequest -Uri $guardianUrl -OutFile $guardianZip
 
 Write-Host "  Extracting files..."
@@ -145,7 +145,7 @@ Write-Host "  Installing backend dependencies..."
 Set-Location "$InstallPath\backend"
 npm install --silent
 
-Write-Host "✓ Guardian AI installed successfully" -ForegroundColor Green
+Write-Host "✓ CRN Interface installed successfully" -ForegroundColor Green
 Write-Host ""
 
 # Step 6: Create Desktop Shortcut
@@ -154,8 +154,8 @@ Write-Host "[6/6] Creating shortcuts..." -ForegroundColor Cyan
 # Create start script
 $startScript = @"
 @echo off
-title Guardian AI
-echo Starting Guardian AI...
+title CRN Interface
+echo Starting CRN Interface...
 echo.
 
 REM Start Ollama service
@@ -166,21 +166,21 @@ timeout /t 3 /nobreak >nul
 
 REM Start backend
 cd /d "$InstallPath\backend"
-start "Guardian AI Backend" cmd /k "npm start"
+start "CRN Interface Backend" cmd /k "npm start"
 
 REM Wait for backend to start
 timeout /t 3 /nobreak >nul
 
 REM Start frontend
 cd /d "$InstallPath"
-start "Guardian AI" cmd /k "npm run dev"
+start "CRN Interface" cmd /k "npm run dev"
 
 echo.
-echo Guardian AI is starting...
+echo CRN Interface is starting...
 echo Backend: http://localhost:3000
 echo Frontend: http://localhost:5173
 echo.
-echo Press any key to open Guardian AI in your browser...
+echo Press any key to open CRN Interface in your browser...
 pause >nul
 
 start http://localhost:5173
@@ -188,16 +188,16 @@ start http://localhost:5173
 exit
 "@
 
-$startScriptPath = "$InstallPath\start-guardian-ai.bat"
+$startScriptPath = "$InstallPath\start-crn-interface.bat"
 $startScript | Out-File -FilePath $startScriptPath -Encoding ASCII
 
 # Create desktop shortcut
 $WshShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Guardian AI.lnk")
+$Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\CRN Interface.lnk")
 $Shortcut.TargetPath = $startScriptPath
 $Shortcut.WorkingDirectory = $InstallPath
 $Shortcut.IconLocation = "$InstallPath\public\favicon.ico"
-$Shortcut.Description = "Guardian AI - Your Family's AI Assistant"
+$Shortcut.Description = "CRN Interface - Your Family's AI Assistant"
 $Shortcut.Save()
 
 Write-Host "✓ Desktop shortcut created" -ForegroundColor Green
@@ -208,11 +208,11 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host "   Installation Complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Guardian AI has been installed to:" -ForegroundColor Cyan
+Write-Host "CRN Interface has been installed to:" -ForegroundColor Cyan
 Write-Host "  $InstallPath" -ForegroundColor White
 Write-Host ""
-Write-Host "To start Guardian AI:" -ForegroundColor Cyan
-Write-Host "  1. Double-click 'Guardian AI' on your desktop" -ForegroundColor White
+Write-Host "To start CRN Interface:" -ForegroundColor Cyan
+Write-Host "  1. Double-click 'CRN Interface' on your desktop" -ForegroundColor White
 Write-Host "  2. Or run: $startScriptPath" -ForegroundColor White
 Write-Host ""
 Write-Host "First-time setup:" -ForegroundColor Cyan
@@ -220,22 +220,22 @@ Write-Host "  1. Enter your license key (or start a free trial)" -ForegroundColo
 Write-Host "  2. Wait for the AI model to load (first time only)" -ForegroundColor White
 Write-Host "  3. Start chatting with your AI assistant!" -ForegroundColor White
 Write-Host ""
-Write-Host "Need help? Visit: https://guardian-ai.com/support" -ForegroundColor Cyan
+Write-Host "Need help? Visit: https://crn-interface.com/support" -ForegroundColor Cyan
 Write-Host ""
 
 # Ask to start now
-$start = Read-Host "Would you like to start Guardian AI now? (Y/N)"
+$start = Read-Host "Would you like to start CRN Interface now? (Y/N)"
 if ($start -eq "Y" -or $start -eq "y") {
     Write-Host ""
-    Write-Host "Starting Guardian AI..." -ForegroundColor Cyan
+    Write-Host "Starting CRN Interface..." -ForegroundColor Cyan
     Start-Process -FilePath $startScriptPath
 } else {
     Write-Host ""
-    Write-Host "You can start Guardian AI anytime from your desktop shortcut." -ForegroundColor Cyan
+    Write-Host "You can start CRN Interface anytime from your desktop shortcut." -ForegroundColor Cyan
 }
 
 Write-Host ""
-Write-Host "Thank you for choosing Guardian AI!" -ForegroundColor Green
+Write-Host "Thank you for choosing CRN Interface!" -ForegroundColor Green
 Write-Host ""
 Read-Host "Press Enter to exit installer"
 

@@ -93,7 +93,7 @@ export default function LicenseModal({ isOpen, onClose, onActivated }: LicenseMo
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 border border-cyan-500/30 rounded-lg max-w-md w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-cyan-400">Guardian AI License</h2>
+          <h2 className="text-2xl font-bold text-cyan-400">CRN Interface License</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -105,7 +105,7 @@ export default function LicenseModal({ isOpen, onClose, onActivated }: LicenseMo
         {mode === 'trial' && (
           <div className="space-y-4">
             <p className="text-gray-300">
-              Start your <span className="text-cyan-400 font-semibold">14-day free trial</span> to experience Guardian AI.
+              Start your <span className="text-cyan-400 font-semibold">14-day free trial</span> to experience CRN Interface.
             </p>
             
             <div>
@@ -155,7 +155,7 @@ export default function LicenseModal({ isOpen, onClose, onActivated }: LicenseMo
         {mode === 'activate' && (
           <div className="space-y-4">
             <p className="text-gray-300">
-              Enter your license key to activate Guardian AI on this device.
+              Enter your license key to activate CRN Interface on this device.
             </p>
             
             <div>
@@ -166,7 +166,7 @@ export default function LicenseModal({ isOpen, onClose, onActivated }: LicenseMo
                 type="text"
                 value={licenseKey}
                 onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
-                placeholder="GRDAI-XXXXX-XXXXX-XXXXX-XXXXX"
+                placeholder="CRNIF-XXXXX-XXXXX-XXXXX-XXXXX"
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 font-mono"
               />
             </div>

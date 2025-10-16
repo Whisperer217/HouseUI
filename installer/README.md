@@ -1,4 +1,4 @@
-# Guardian AI - Installation Guide
+# CRN Interface - Installation Guide
 
 **One-click installation for Windows, macOS, and Linux**
 
@@ -8,7 +8,7 @@
 
 1. **Download the installer:**
    ```
-   https://guardian-ai.com/download/install-windows.ps1
+   https://crn-interface.com/download/install-windows.ps1
    ```
 
 2. **Right-click** the downloaded file and select **"Run with PowerShell"**
@@ -17,21 +17,21 @@
    - Install Node.js (if needed)
    - Install Ollama (if needed)
    - Download DeepSeek R1 8B model
-   - Install Guardian AI
+   - Install CRN Interface
    - Create desktop shortcut
 
-4. **Launch Guardian AI** from your desktop shortcut
+4. **Launch CRN Interface** from your desktop shortcut
 
 ### macOS / Linux
 
 1. **Download and run the installer:**
    ```bash
-   curl -fsSL https://guardian-ai.com/install.sh | bash
+   curl -fsSL https://crn-interface.com/install.sh | bash
    ```
 
    Or download manually:
    ```bash
-   curl -O https://guardian-ai.com/download/install-unix.sh
+   curl -O https://crn-interface.com/download/install-unix.sh
    chmod +x install-unix.sh
    ./install-unix.sh
    ```
@@ -40,12 +40,12 @@
    - Install Node.js (if needed)
    - Install Ollama (if needed)
    - Download DeepSeek R1 8B model
-   - Install Guardian AI
+   - Install CRN Interface
    - Create desktop shortcut and command alias
 
-3. **Launch Guardian AI:**
+3. **Launch CRN Interface:**
    ```bash
-   guardian-ai
+   crn-interface
    ```
 
 ## What Gets Installed
@@ -67,7 +67,7 @@
 ### Components Installed
 
 1. **Node.js** (v20.11.0)
-   - Required for running the Guardian AI application
+   - Required for running the CRN Interface application
    - Includes npm package manager
 
 2. **Ollama** (latest version)
@@ -75,10 +75,10 @@
    - Runs DeepSeek R1 and other models
 
 3. **DeepSeek R1 8B Model** (~4.7GB)
-   - Primary AI model for Guardian AI
+   - Primary AI model for CRN Interface
    - Runs entirely on your local machine
 
-4. **Guardian AI Application**
+4. **CRN Interface Application**
    - Frontend interface (React + TypeScript)
    - Backend proxy server (Node.js + Express)
    - License management system
@@ -88,17 +88,17 @@
 ### Installation Locations
 
 **Windows:**
-- Guardian AI: `C:\Users\<YourName>\AppData\Local\GuardianAI`
+- CRN Interface: `C:\Users\<YourName>\AppData\Local\GuardianAI`
 - Ollama: `C:\Program Files\Ollama`
 - Models: `C:\Users\<YourName>\.ollama\models`
 
 **macOS:**
-- Guardian AI: `~/.guardian-ai`
+- CRN Interface: `~/.crn-interface`
 - Ollama: `/usr/local/bin/ollama`
 - Models: `~/.ollama/models`
 
 **Linux:**
-- Guardian AI: `~/.guardian-ai`
+- CRN Interface: `~/.crn-interface`
 - Ollama: `/usr/local/bin/ollama`
 - Models: `~/.ollama/models`
 
@@ -106,7 +106,7 @@
 
 ### 1. License Activation
 
-When you first launch Guardian AI, you'll be prompted to:
+When you first launch CRN Interface, you'll be prompted to:
 
 **Option A: Start Free Trial**
 - Enter your email address
@@ -114,7 +114,7 @@ When you first launch Guardian AI, you'll be prompted to:
 - Full access to all basic features
 
 **Option B: Activate License**
-- Enter your license key (format: GRDAI-XXXXX-XXXXX-XXXXX-XXXXX)
+- Enter your license key (format: CRNIF-XXXXX-XXXXX-XXXXX-XXXXX)
 - System will activate automatically
 - Unlock features based on your license tier
 
@@ -123,7 +123,7 @@ When you first launch Guardian AI, you'll be prompted to:
 The first time you use the AI:
 - DeepSeek R1 model will load into memory (~4-5 seconds)
 - Subsequent uses will be faster
-- Model stays loaded while Guardian AI is running
+- Model stays loaded while CRN Interface is running
 
 ### 3. Start Using
 
@@ -184,12 +184,12 @@ Once activated, you can:
 **"Node.js installation failed"**
 - Manually download from: https://nodejs.org
 - Install Node.js v20.11.0 or later
-- Re-run Guardian AI installer
+- Re-run CRN Interface installer
 
 **"Ollama installation failed"**
 - Manually download from: https://ollama.ai
 - Install Ollama
-- Re-run Guardian AI installer
+- Re-run CRN Interface installer
 
 **"Model download failed"**
 - Check internet connection
@@ -201,12 +201,12 @@ Once activated, you can:
 **"Cannot connect to AI"**
 - Ensure Ollama service is running
 - Check if model is loaded: `ollama list`
-- Restart Guardian AI
+- Restart CRN Interface
 
 **"License activation failed"**
 - Check internet connection
 - Verify license key format
-- Contact support: support@guardian-ai.com
+- Contact support: support@crn-interface.com
 
 **"Performance is slow"**
 - Close other applications
@@ -217,11 +217,11 @@ Once activated, you can:
 ### Getting Help
 
 **Documentation:**
-- https://guardian-ai.com/docs
+- https://crn-interface.com/docs
 
 **Support:**
-- Email: support@guardian-ai.com
-- Discord: https://discord.gg/guardian-ai
+- Email: support@crn-interface.com
+- Discord: https://discord.gg/crn-interface
 - GitHub: https://github.com/Whisperer217/HouseUI/issues
 
 **Community:**
@@ -247,12 +247,12 @@ Once activated, you can:
 
 1. Run the uninstall command:
    ```bash
-   rm -rf ~/.guardian-ai
+   rm -rf ~/.crn-interface
    ```
 
 2. Remove command alias:
    - Edit `~/.bashrc` or `~/.zshrc`
-   - Remove the `guardian-ai` alias line
+   - Remove the `crn-interface` alias line
 
 3. Uninstall Ollama (optional):
    ```bash
@@ -291,7 +291,7 @@ Once activated, you can:
 
 ### Automatic Updates
 
-Guardian AI checks for updates weekly:
+CRN Interface checks for updates weekly:
 - Security patches: Auto-installed
 - Feature updates: Notification shown
 - Major versions: Manual approval required
@@ -309,7 +309,7 @@ npm install
 
 **macOS / Linux:**
 ```bash
-cd ~/.guardian-ai
+cd ~/.crn-interface
 git pull
 npm install
 cd backend
@@ -333,7 +333,7 @@ ollama pull llama3:8b
 ollama pull mistral:7b
 ```
 
-Then select in Guardian AI settings.
+Then select in CRN Interface settings.
 
 ### Network Access
 
@@ -344,7 +344,7 @@ To access from other devices:
 
 ### GPU Acceleration
 
-Guardian AI automatically uses GPU if available:
+CRN Interface automatically uses GPU if available:
 - NVIDIA: CUDA support via Ollama
 - AMD: ROCm support via Ollama
 - Apple Silicon: Metal support via Ollama
@@ -379,15 +379,15 @@ We welcome contributions! See:
 
 ## License
 
-Guardian AI is proprietary software with a one-time purchase license.
+CRN Interface is proprietary software with a one-time purchase license.
 
 - **Personal Use:** Included with license purchase
-- **Commercial Use:** Contact sales@guardian-ai.com
+- **Commercial Use:** Contact sales@crn-interface.com
 - **Source Code:** Available to Founder tier license holders
 
 ---
 
 **Built by a combat medic who's seen what trauma does and wants to help families stay safe.**
 
-**© 2025 Guardian AI. All rights reserved.**
+**© 2025 CRN Interface. All rights reserved.**
 

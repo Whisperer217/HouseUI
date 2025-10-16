@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Guardian AI - macOS/Linux Installer
+# CRN Interface - macOS/Linux Installer
 # One-click installation script for Unix-based systems
 
 set -e
@@ -13,10 +13,10 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Installation path
-INSTALL_PATH="${HOME}/.guardian-ai"
+INSTALL_PATH="${HOME}/.crn-interface"
 
 echo -e "${CYAN}========================================"
-echo -e "   Guardian AI - Unix Installer"
+echo -e "   CRN Interface - Unix Installer"
 echo -e "   Your Family's AI Assistant"
 echo -e "========================================${NC}"
 echo ""
@@ -131,14 +131,14 @@ fi
 
 echo ""
 
-# Step 6: Install Guardian AI
-echo -e "${CYAN}[6/6] Installing Guardian AI...${NC}"
+# Step 6: Install CRN Interface
+echo -e "${CYAN}[6/6] Installing CRN Interface...${NC}"
 
-# Download Guardian AI package
+# Download CRN Interface package
 GUARDIAN_URL="https://github.com/Whisperer217/HouseUI/archive/refs/heads/main.zip"
-GUARDIAN_ZIP="/tmp/guardian-ai.zip"
+GUARDIAN_ZIP="/tmp/crn-interface.zip"
 
-echo "  Downloading Guardian AI..."
+echo "  Downloading CRN Interface..."
 curl -L -o "$GUARDIAN_ZIP" "$GUARDIAN_URL"
 
 echo "  Extracting files..."
@@ -159,23 +159,23 @@ echo "  Installing backend dependencies..."
 cd "$INSTALL_PATH/backend"
 npm install --silent
 
-echo -e "${GREEN}✓ Guardian AI installed successfully${NC}"
+echo -e "${GREEN}✓ CRN Interface installed successfully${NC}"
 echo ""
 
 # Create start script
 echo -e "${CYAN}Creating start script...${NC}"
 
-cat > "$INSTALL_PATH/start-guardian-ai.sh" << 'EOF'
+cat > "$INSTALL_PATH/start-crn-interface.sh" << 'EOF'
 #!/bin/bash
 
-# Guardian AI Startup Script
+# CRN Interface Startup Script
 
 # Colors
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo -e "${CYAN}Starting Guardian AI...${NC}"
+echo -e "${CYAN}Starting CRN Interface...${NC}"
 echo ""
 
 # Start Ollama if not running
@@ -203,7 +203,7 @@ FRONTEND_PID=$!
 sleep 3
 
 echo ""
-echo -e "${GREEN}Guardian AI is running!${NC}"
+echo -e "${GREEN}CRN Interface is running!${NC}"
 echo ""
 echo "Backend:  http://localhost:3000"
 echo "Frontend: http://localhost:5173"
@@ -219,30 +219,30 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 echo ""
-echo "Press Ctrl+C to stop Guardian AI"
+echo "Press Ctrl+C to stop CRN Interface"
 echo ""
 
 # Wait for Ctrl+C
-trap "echo ''; echo 'Stopping Guardian AI...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" INT
+trap "echo ''; echo 'Stopping CRN Interface...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" INT
 wait
 EOF
 
-chmod +x "$INSTALL_PATH/start-guardian-ai.sh"
+chmod +x "$INSTALL_PATH/start-crn-interface.sh"
 
 # Create desktop shortcut (if desktop environment is available)
 if [ -d "$HOME/Desktop" ]; then
-    cat > "$HOME/Desktop/Guardian AI.desktop" << EOF
+    cat > "$HOME/Desktop/CRN Interface.desktop" << EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Guardian AI
+Name=CRN Interface
 Comment=Your Family's AI Assistant
-Exec=$INSTALL_PATH/start-guardian-ai.sh
+Exec=$INSTALL_PATH/start-crn-interface.sh
 Icon=$INSTALL_PATH/public/favicon.ico
 Terminal=true
 Categories=Utility;Application;
 EOF
-    chmod +x "$HOME/Desktop/Guardian AI.desktop"
+    chmod +x "$HOME/Desktop/CRN Interface.desktop"
     echo -e "${GREEN}✓ Desktop shortcut created${NC}"
 fi
 
@@ -255,10 +255,10 @@ elif [ -f "$HOME/.zshrc" ]; then
 fi
 
 if [ -n "$SHELL_RC" ]; then
-    if ! grep -q "guardian-ai" "$SHELL_RC"; then
+    if ! grep -q "crn-interface" "$SHELL_RC"; then
         echo "" >> "$SHELL_RC"
-        echo "# Guardian AI" >> "$SHELL_RC"
-        echo "alias guardian-ai='$INSTALL_PATH/start-guardian-ai.sh'" >> "$SHELL_RC"
+        echo "# CRN Interface" >> "$SHELL_RC"
+        echo "alias crn-interface='$INSTALL_PATH/start-crn-interface.sh'" >> "$SHELL_RC"
         echo -e "${GREEN}✓ Command alias added to $SHELL_RC${NC}"
     fi
 fi
@@ -270,35 +270,35 @@ echo -e "${GREEN}========================================"
 echo -e "   Installation Complete!"
 echo -e "========================================${NC}"
 echo ""
-echo -e "${CYAN}Guardian AI has been installed to:${NC}"
+echo -e "${CYAN}CRN Interface has been installed to:${NC}"
 echo -e "  $INSTALL_PATH"
 echo ""
-echo -e "${CYAN}To start Guardian AI:${NC}"
-echo -e "  1. Run: guardian-ai"
-echo -e "  2. Or double-click 'Guardian AI' on your desktop"
-echo -e "  3. Or run: $INSTALL_PATH/start-guardian-ai.sh"
+echo -e "${CYAN}To start CRN Interface:${NC}"
+echo -e "  1. Run: crn-interface"
+echo -e "  2. Or double-click 'CRN Interface' on your desktop"
+echo -e "  3. Or run: $INSTALL_PATH/start-crn-interface.sh"
 echo ""
 echo -e "${CYAN}First-time setup:${NC}"
 echo -e "  1. Enter your license key (or start a free trial)"
 echo -e "  2. Wait for the AI model to load (first time only)"
 echo -e "  3. Start chatting with your AI assistant!"
 echo ""
-echo -e "${CYAN}Need help? Visit: https://guardian-ai.com/support${NC}"
+echo -e "${CYAN}Need help? Visit: https://crn-interface.com/support${NC}"
 echo ""
 
 # Ask to start now
-read -p "Would you like to start Guardian AI now? (Y/N): " -n 1 -r
+read -p "Would you like to start CRN Interface now? (Y/N): " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo ""
-    echo -e "${CYAN}Starting Guardian AI...${NC}"
-    "$INSTALL_PATH/start-guardian-ai.sh"
+    echo -e "${CYAN}Starting CRN Interface...${NC}"
+    "$INSTALL_PATH/start-crn-interface.sh"
 else
     echo ""
-    echo -e "${CYAN}You can start Guardian AI anytime by running: guardian-ai${NC}"
+    echo -e "${CYAN}You can start CRN Interface anytime by running: crn-interface${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}Thank you for choosing Guardian AI!${NC}"
+echo -e "${GREEN}Thank you for choosing CRN Interface!${NC}"
 echo ""
 
