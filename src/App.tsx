@@ -18,7 +18,6 @@ import { Theme, themes } from './types/theme';
 import { projectService } from './services/projectService';
 import { mapDBProjectToProject } from './utils/projectMapper';
 import { themeService } from './services/themeService';
-import { supabase } from './lib/supabase';
 import { Sparkles, Wrench, Palette } from 'lucide-react';
 
 const profileColors = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b'];
@@ -44,28 +43,43 @@ function App() {
 
   useEffect(() => {
     if (currentProfile) {
+      localStorage.setItem('current_profile', JSON.stringify(currentProfile));
+    }
+  }, [currentProfile]);
+
+  useEffect(() => {
+    if (currentProfile) {
       loadTheme();
     }
   }, [currentProfile]);
 
-  const loadProfiles = async () => {
+  const loadProfiles = () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const savedProfiles = localStorage.getItem('family_profiles');
+      const savedCurrentProfile = localStorage.getItem('current_profile');
 
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const profiles: FamilyProfile[] = data.map((profile, index) => ({
-          id: profile.id,
-          name: profile.name,
-          avatar: profile.avatar_url,
-          color: profileColors[index % profileColors.length],
-        }));
+      if (savedProfiles) {
+        const profiles: FamilyProfile[] = JSON.parse(savedProfiles);
         setFamilyProfiles(profiles);
-        setCurrentProfile(profiles[0]);
+
+        if (savedCurrentProfile) {
+          setCurrentProfile(JSON.parse(savedCurrentProfile));
+        } else {
+          setCurrentProfile(profiles[0]);
+        }
+      } else {
+        const defaultProfiles: FamilyProfile[] = [
+          {
+            id: 'default-user',
+            name: 'User',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User',
+            color: profileColors[0],
+          },
+        ];
+        setFamilyProfiles(defaultProfiles);
+        setCurrentProfile(defaultProfiles[0]);
+        localStorage.setItem('family_profiles', JSON.stringify(defaultProfiles));
+        localStorage.setItem('current_profile', JSON.stringify(defaultProfiles[0]));
       }
     } catch (error) {
       console.error('Error loading profiles:', error);
@@ -82,12 +96,14 @@ function App() {
     }
   };
 
-  const loadProjects = async () => {
+  const loadProjects = () => {
     try {
       setLoading(true);
-      const dbProjects = await projectService.getAllProjects();
-      const mappedProjects = dbProjects.map(mapDBProjectToProject);
-      setProjects(mappedProjects);
+      const savedProjects = localStorage.getItem('projects');
+      if (savedProjects) {
+        const projects = JSON.parse(savedProjects);
+        setProjects(projects);
+      }
       setAiStatus('ready');
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -97,7 +113,7 @@ function App() {
     }
   };
 
-  const handleCreateClick = async (type: string) => {
+  const handleCreateClick = (type: string) => {
     if (!currentProfile) return;
     try {
       setAiStatus('processing');
@@ -109,19 +125,23 @@ function App() {
         art: 'Untitled Art',
       };
 
-      const newProject = await projectService.createProject({
+      const newProject: Project = {
+        id: `project-${Date.now()}`,
         title: projectTitles[type as keyof typeof projectTitles] || 'New Project',
         description: `A new ${type} project`,
         type: type as 'game' | 'app' | 'story' | 'art',
-        created_by: currentProfile.id,
-      });
+        creator: currentProfile,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-      const mappedProject = mapDBProjectToProject(newProject);
-      setProjects([mappedProject, ...projects]);
+      const updatedProjects = [newProject, ...projects];
+      setProjects(updatedProjects);
+      localStorage.setItem('projects', JSON.stringify(updatedProjects));
       setAiStatus('ready');
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project. Please make sure the database is set up.');
+      alert('Failed to create project.');
       setAiStatus('offline');
     }
   };
@@ -130,20 +150,24 @@ function App() {
     console.log('Opening project:', project.title);
   };
 
-  const handleSelectTemplate = async (template: any) => {
+  const handleSelectTemplate = (template: any) => {
     if (!currentProfile) return;
     try {
       setAiStatus('processing');
 
-      const newProject = await projectService.createProject({
+      const newProject: Project = {
+        id: `project-${Date.now()}`,
         title: template.title,
         description: template.description,
         type: template.type as 'game' | 'app' | 'story' | 'art',
-        created_by: currentProfile.id,
-      });
+        creator: currentProfile,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-      const mappedProject = mapDBProjectToProject(newProject);
-      setProjects([mappedProject, ...projects]);
+      const updatedProjects = [newProject, ...projects];
+      setProjects(updatedProjects);
+      localStorage.setItem('projects', JSON.stringify(updatedProjects));
       setAiStatus('ready');
     } catch (error) {
       console.error('Error creating project from template:', error);

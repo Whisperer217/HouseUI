@@ -1,4 +1,3 @@
-import { supabase } from '../lib/supabase';
 import { themes, Theme } from '../types/theme';
 
 class ThemeService {
@@ -16,17 +15,10 @@ class ThemeService {
     return Object.values(themes);
   }
 
-  async loadUserTheme(userId: string): Promise<Theme> {
+  loadUserTheme(userId: string): Theme {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('preferences')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      const themeId = data?.preferences?.theme || 'dark';
+      const savedTheme = localStorage.getItem(`user_theme_${userId}`);
+      const themeId = savedTheme || 'dark';
       this.currentTheme = this.getThemeById(themeId);
       return this.currentTheme;
     } catch (error) {
@@ -36,24 +28,9 @@ class ThemeService {
     }
   }
 
-  async saveUserTheme(userId: string, themeId: string): Promise<void> {
+  saveUserTheme(userId: string, themeId: string): void {
     try {
-      const { data: existingData } = await supabase
-        .from('profiles')
-        .select('preferences')
-        .eq('id', userId)
-        .maybeSingle();
-
-      const preferences = existingData?.preferences || {};
-      preferences.theme = themeId;
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ preferences })
-        .eq('id', userId);
-
-      if (error) throw error;
-
+      localStorage.setItem(`user_theme_${userId}`, themeId);
       this.currentTheme = this.getThemeById(themeId);
     } catch (error) {
       console.error('Error saving theme:', error);

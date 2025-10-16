@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Clock, Zap, Star, Users } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface Activity {
   id: string;
@@ -16,50 +15,24 @@ export default function ActivityFeed() {
 
   useEffect(() => {
     loadActivities();
-
-    const channel = supabase
-      .channel('projects_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'projects' },
-        () => {
-          loadActivities();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    const interval = setInterval(loadActivities, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadActivities = async () => {
+  const loadActivities = () => {
     try {
-      const { data } = await supabase
-        .from('projects')
-        .select(`
-          id,
-          title,
-          created_at,
-          updated_at,
-          profiles (
-            name,
-            avatar_url
-          )
-        `)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
-      if (data) {
-        const mapped: Activity[] = data.map((project: any) => ({
+      const savedProjects = localStorage.getItem('projects');
+      if (savedProjects) {
+        const projects = JSON.parse(savedProjects);
+        const mapped: Activity[] = projects.slice(0, 10).map((project: any) => ({
           id: project.id,
-          user_name: project.profiles?.name || 'Unknown',
-          action: new Date(project.updated_at).getTime() - new Date(project.created_at).getTime() < 5000
+          user_name: project.creator?.name || 'Unknown',
+          action: new Date(project.updatedAt).getTime() - new Date(project.createdAt).getTime() < 5000
             ? 'created'
             : 'updated',
           project_title: project.title,
-          timestamp: project.updated_at,
-          avatar_color: getColorForName(project.profiles?.name || 'Unknown'),
+          timestamp: project.updatedAt,
+          avatar_color: getColorForName(project.creator?.name || 'Unknown'),
         }));
         setActivities(mapped);
       }

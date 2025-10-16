@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface Template {
   id: string;
@@ -26,16 +25,40 @@ export default function TemplatesModal({ isOpen, onClose, onSelectTemplate }: Te
     }
   }, [isOpen]);
 
-  const loadTemplates = async () => {
+  const loadTemplates = () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('project_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTemplates(data || []);
+      const defaultTemplates: Template[] = [
+        {
+          id: '1',
+          title: 'Platformer Game',
+          description: 'A classic side-scrolling platformer with power-ups and enemies',
+          type: 'game',
+          thumbnail_url: null,
+        },
+        {
+          id: '2',
+          title: 'Todo App',
+          description: 'A simple task management application',
+          type: 'app',
+          thumbnail_url: null,
+        },
+        {
+          id: '3',
+          title: 'Adventure Story',
+          description: 'An interactive choose-your-own-adventure story',
+          type: 'story',
+          thumbnail_url: null,
+        },
+        {
+          id: '4',
+          title: 'Digital Art Gallery',
+          description: 'Showcase your artwork in a beautiful gallery',
+          type: 'art',
+          thumbnail_url: null,
+        },
+      ];
+      setTemplates(defaultTemplates);
     } catch (error) {
       console.error('Error loading templates:', error);
     } finally {

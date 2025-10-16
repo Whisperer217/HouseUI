@@ -1,39 +1,37 @@
-import { supabase } from '../lib/supabase';
 import { ChatMessage } from '../types';
 
 export const chatService = {
-  async getMessages(): Promise<ChatMessage[]> {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      throw error;
+  getMessages(): ChatMessage[] {
+    try {
+      const savedMessages = localStorage.getItem('chat_messages');
+      return savedMessages ? JSON.parse(savedMessages) : [];
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      return [];
     }
-
-    return data || [];
   },
 
-  async sendMessage(
+  sendMessage(
     userId: string,
     message: string,
     isAi: boolean = false
-  ): Promise<ChatMessage> {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .insert({
-        user_id: userId,
-        message,
-        is_ai: isAi,
-      })
-      .select()
-      .single();
+  ): ChatMessage {
+    const newMessage: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      user_id: userId,
+      message,
+      is_ai: isAi,
+      created_at: new Date().toISOString(),
+    };
 
-    if (error) {
-      throw error;
-    }
+    const messages = this.getMessages();
+    const updatedMessages = [...messages, newMessage];
+    localStorage.setItem('chat_messages', JSON.stringify(updatedMessages));
 
-    return data;
+    return newMessage;
+  },
+
+  clearMessages(): void {
+    localStorage.removeItem('chat_messages');
   },
 };

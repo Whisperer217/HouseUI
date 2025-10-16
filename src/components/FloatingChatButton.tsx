@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Sparkles } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface FloatingChatButtonProps {
   onClick: () => void;
@@ -12,32 +11,9 @@ export default function FloatingChatButton({ onClick, currentUserId }: FloatingC
   const [hasNewActivity, setHasNewActivity] = useState(false);
 
   useEffect(() => {
-    loadUnreadCount();
-    const interval = setInterval(loadUnreadCount, 5000);
-    return () => clearInterval(interval);
+    setUnreadCount(0);
+    setHasNewActivity(false);
   }, [currentUserId]);
-
-  const loadUnreadCount = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('thread_unread_counts')
-        .select('unread_count')
-        .eq('user_id', currentUserId);
-
-      if (error) throw error;
-
-      const total = data?.reduce((sum, item) => sum + item.unread_count, 0) || 0;
-
-      if (total > unreadCount) {
-        setHasNewActivity(true);
-        setTimeout(() => setHasNewActivity(false), 3000);
-      }
-
-      setUnreadCount(total);
-    } catch (error) {
-      console.error('Error loading unread count:', error);
-    }
-  };
 
   return (
     <button

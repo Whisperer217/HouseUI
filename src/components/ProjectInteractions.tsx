@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Send } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface ProjectInteractionsProps {
   projectId: string;
@@ -10,12 +9,10 @@ interface ProjectInteractionsProps {
 interface Comment {
   id: string;
   user_id: string;
+  user_name: string;
   comment: string;
   reaction: string | null;
   created_at: string;
-  profiles?: {
-    name: string;
-  };
 }
 
 export default function ProjectInteractions({ projectId, userId }: ProjectInteractionsProps) {
@@ -26,108 +23,83 @@ export default function ProjectInteractions({ projectId, userId }: ProjectIntera
   const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
-    loadFavorites();
-    loadComments();
+    loadData();
   }, [projectId]);
 
-  const loadFavorites = async () => {
-    try {
-      const { count } = await supabase
-        .from('project_favorites')
-        .select('*', { count: 'exact', head: true })
-        .eq('project_id', projectId);
+  const loadData = () => {
+    const favKey = `project_favorites_${projectId}`;
+    const commentsKey = `project_comments_${projectId}`;
+    const userFavKey = `user_favorite_${userId}_${projectId}`;
 
-      setFavoriteCount(count || 0);
+    const savedFavCount = localStorage.getItem(favKey);
+    const savedComments = localStorage.getItem(commentsKey);
+    const savedUserFav = localStorage.getItem(userFavKey);
 
-      const { data } = await supabase
-        .from('project_favorites')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('user_id', userId)
-        .maybeSingle();
+    setFavoriteCount(savedFavCount ? parseInt(savedFavCount) : 0);
+    setComments(savedComments ? JSON.parse(savedComments) : []);
+    setIsFavorited(savedUserFav === 'true');
+  };
 
-      setIsFavorited(!!data);
-    } catch (error) {
-      console.error('Error loading favorites:', error);
+  const toggleFavorite = () => {
+    const favKey = `project_favorites_${projectId}`;
+    const userFavKey = `user_favorite_${userId}_${projectId}`;
+
+    if (isFavorited) {
+      const newCount = Math.max(0, favoriteCount - 1);
+      setFavoriteCount(newCount);
+      setIsFavorited(false);
+      localStorage.setItem(favKey, newCount.toString());
+      localStorage.removeItem(userFavKey);
+    } else {
+      const newCount = favoriteCount + 1;
+      setFavoriteCount(newCount);
+      setIsFavorited(true);
+      localStorage.setItem(favKey, newCount.toString());
+      localStorage.setItem(userFavKey, 'true');
     }
   };
 
-  const loadComments = async () => {
-    try {
-      const { data } = await supabase
-        .from('project_comments')
-        .select(`
-          *,
-          profiles (
-            name
-          )
-        `)
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
-
-      setComments(data || []);
-    } catch (error) {
-      console.error('Error loading comments:', error);
-    }
-  };
-
-  const toggleFavorite = async () => {
-    try {
-      if (isFavorited) {
-        await supabase
-          .from('project_favorites')
-          .delete()
-          .eq('project_id', projectId)
-          .eq('user_id', userId);
-
-        setIsFavorited(false);
-        setFavoriteCount(favoriteCount - 1);
-      } else {
-        await supabase
-          .from('project_favorites')
-          .insert({ project_id: projectId, user_id: userId });
-
-        setIsFavorited(true);
-        setFavoriteCount(favoriteCount + 1);
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-    }
-  };
-
-  const addComment = async () => {
+  const addComment = () => {
     if (!newComment.trim()) return;
 
-    try {
-      await supabase
-        .from('project_comments')
-        .insert({
-          project_id: projectId,
-          user_id: userId,
-          comment: newComment.trim(),
-        });
+    const profiles = JSON.parse(localStorage.getItem('family_profiles') || '[]');
+    const currentUser = profiles.find((p: any) => p.id === userId);
 
-      setNewComment('');
-      loadComments();
-    } catch (error) {
-      console.error('Error adding comment:', error);
-    }
+    const comment: Comment = {
+      id: `comment-${Date.now()}`,
+      user_id: userId,
+      user_name: currentUser?.name || 'User',
+      comment: newComment.trim(),
+      reaction: null,
+      created_at: new Date().toISOString(),
+    };
+
+    const updatedComments = [comment, ...comments];
+    setComments(updatedComments);
+    setNewComment('');
+
+    const commentsKey = `project_comments_${projectId}`;
+    localStorage.setItem(commentsKey, JSON.stringify(updatedComments));
   };
 
-  const addReaction = async (reaction: string) => {
-    try {
-      await supabase
-        .from('project_comments')
-        .insert({
-          project_id: projectId,
-          user_id: userId,
-          reaction,
-        });
+  const addReaction = (reaction: string) => {
+    const profiles = JSON.parse(localStorage.getItem('family_profiles') || '[]');
+    const currentUser = profiles.find((p: any) => p.id === userId);
 
-      loadComments();
-    } catch (error) {
-      console.error('Error adding reaction:', error);
-    }
+    const reactionComment: Comment = {
+      id: `reaction-${Date.now()}`,
+      user_id: userId,
+      user_name: currentUser?.name || 'User',
+      comment: '',
+      reaction,
+      created_at: new Date().toISOString(),
+    };
+
+    const updatedComments = [reactionComment, ...comments];
+    setComments(updatedComments);
+
+    const commentsKey = `project_comments_${projectId}`;
+    localStorage.setItem(commentsKey, JSON.stringify(updatedComments));
   };
 
   return (
@@ -194,7 +166,7 @@ export default function ProjectInteractions({ projectId, userId }: ProjectIntera
                 ) : (
                   <>
                     <p className="text-xs text-gray-400 mb-1">
-                      {comment.profiles?.name || 'Unknown'}
+                      {comment.user_name}
                     </p>
                     <p className="text-sm text-white">{comment.comment}</p>
                   </>

@@ -16,7 +16,6 @@ import {
   MoreVertical,
   PinOff,
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { FamilyProfile } from '../types';
 import MessageReactions from './chat/MessageReactions';
 import MessageContent from './chat/MessageContent';
