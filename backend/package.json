@@ -1,0 +1,27 @@
+{
+  "name": "houseui-backend-proxy",
+  "version": "1.0.0",
+  "description": "Backend proxy server for HouseUI to connect Vercel frontend with local Ollama instances",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "ollama",
+    "proxy",
+    "ai",
+    "tailscale"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ws": "^8.14.2",
+    "node-fetch": "^3.3.2"
+  }
+}
+
