@@ -60,26 +60,44 @@ export default function ChatPanel({ currentProfile }: ChatPanelProps) {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      const errorMessage = await chatService.sendMessage(
+        currentProfile.id,
+        error instanceof Error ? error.message : 'An error occurred. Please try again.',
+        true
+      );
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const generateAIResponse = async (userInput: string): Promise<string> => {
-    const lowerInput = userInput.toLowerCase();
+    try {
+      const response = await fetch('http://localhost:3000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'deepseek-r1:8b',
+          messages: [
+            {
+              role: 'user',
+              content: userInput,
+            },
+          ],
+        }),
+      });
 
-    if (lowerInput.includes('game') || lowerInput.includes('play')) {
-      return "I can help you create a game! Would you like to make a puzzle game, an adventure game, or something else? Tell me more about your idea.";
-    } else if (lowerInput.includes('story') || lowerInput.includes('book')) {
-      return "Writing a story is exciting! What kind of story interests you? Adventure, fantasy, mystery, or something else? I'm here to help you develop your ideas.";
-    } else if (lowerInput.includes('art') || lowerInput.includes('draw')) {
-      return "Art projects are wonderful! Are you thinking of digital art, a drawing, or something creative? Describe what you'd like to make.";
-    } else if (lowerInput.includes('app') || lowerInput.includes('tool')) {
-      return "Building an app sounds great! What kind of app do you want to create? A tool, a helper, or something for fun?";
-    } else if (lowerInput.includes('help') || lowerInput.includes('what can you')) {
-      return "I can help you create games, apps, stories, and art! Just tell me what you'd like to make, or click Quick Create above to get started. What would you like to work on?";
-    } else {
-      return "That's interesting! Tell me more about your idea. I'm here to help you bring your creative projects to life. What would you like to create?";
+      if (!response.ok) {
+        throw new Error(`Backend responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.response || data.message || 'No response from AI';
+    } catch (error) {
+      console.error('Error calling AI backend:', error);
+      throw new Error('Failed to connect to AI backend at http://localhost:3000. Make sure the backend is running.');
     }
   };
 
